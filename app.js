@@ -18,4 +18,18 @@ mongoose.connection.on('error' , err => {
     console.log(`DB Connection Error: ${err.message}`);
 } )
 
+// bring in routes
+const postRoutes = require('./routes/post');
+const commentRoutes = require('./routes/comment');
+const tagRoutes = require('./routes/tag');
+
+app.use(morgan('dev'));
+app.use(bodyParser.json({limit: "50MB"}));
+app.use(cookieParser())
+
+app.use("/api", postRoutes);
+app.use("/api", commentRoutes);
+app.use("/api", tagRoutes);
+
 const port = process.env.PORT || 3005;
+app.listen(port, () => {console.log(`A node js api is listening on port: ${port}`)});
