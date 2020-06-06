@@ -1,5 +1,8 @@
 const Post = require('../models/post');
 const Tag = require('../models/tag');
+const cloudinary = require('cloudinary');
+const _ = require('underscore');
+const Q = require('q');
 
 // Create a post
 exports.createPost = (req,res) => {
@@ -9,10 +12,39 @@ exports.createPost = (req,res) => {
       return res.status(400).json({status:false, message:"Error in saving the post", error:err});
     }
     else{
-      return res.status(200).json({
-        status: true,
-        message:'Post saved successfully!',
-        data:post
+      Tag.findOne({name: req.body.tag}, function(err, tag)
+      {
+        if(err | tag == undefined)
+        {
+          return res
+            .status(400)
+            .json({
+                status: false,
+                message: 'Error finding the tag'
+            })
+        }
+
+          
+        if(tag.posts)
+        {
+            tag.posts.push(post._id)
+        }
+        else
+        {
+          tag.posts = [post._id]
+        }
+
+        tag.save(function(err, updated_tag)
+        {
+          res
+          .status(200)
+          .json({
+              status: true,
+              message: 'Success adding post to tag',
+              data:updated_tag
+          })
+        })
+          
       })
     }
   })
@@ -148,5 +180,27 @@ exports.addPostToTag = (req, res) => {
       })
     })
       
+  })
+}
+
+// upload image
+exports.uploadImage = (req,res) => {
+  cloudinary.config=({
+    cloud_name:"blog-mc",
+    api_key:"999951464771958",
+    api_secret:"MRUzQlG_ANeEvBeLzJP0cPT3zo4"
+  });
+
+  new Q.Promise((resolve,reject)=>{
+    cloudinary.v2.uploader.upload(req.file,(err, res)=>{
+      if(err){
+        console.log("Cloudinary error:",err)
+        reject(err);
+      }
+      else{
+        console.log("Cloudinary response:",res);
+        return res.status(200).json({"url":resolve(res.url)})
+      }
+    })
   })
 }

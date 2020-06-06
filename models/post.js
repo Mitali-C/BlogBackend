@@ -11,7 +11,15 @@ const postSchema = new mongoose.Schema({
       type :String,
       required : true
     },
-    comments:[{type: Schema.Types.ObjectId, ref: 'CommentModel'}]
+    tag: {
+      type :String,
+      required : true
+    },
+    comments:[{type: Schema.Types.ObjectId, ref: 'CommentModel'}],
+    headerImage:{
+      type:String
+    },
+    images:[String]
   },
   {
     timestamps: true

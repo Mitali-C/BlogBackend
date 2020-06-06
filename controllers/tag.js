@@ -43,7 +43,8 @@ exports.updateTag = (req, res) => {
 
 // get a tag by id or get all tags
 exports.getTags = (req, res) => {
-  if(typeof(req.query.id) != "undefined")
+  console.log(req.query.id)
+  if(req.query.id != undefined)
   {
     console.log(req.query.id)
     Tag.findOne({_id: req.query.id})
@@ -56,7 +57,7 @@ exports.getTags = (req, res) => {
           .status(400)
           .json({
             status: false,
-            message: 'Error finding the tag'
+            error: 'Error finding the tag'
           })
       }
       else if(!tag)
@@ -65,7 +66,7 @@ exports.getTags = (req, res) => {
           .status(400)
           .json({
             status: false,
-            message: 'No tag found with id'
+            error: 'No tag found with id'
           })
       }
       res
@@ -76,6 +77,38 @@ exports.getTags = (req, res) => {
         tag: tag
       })
     })
+  }
+  else if(req.query.name !==undefined){
+    Tag.find({name:req.query.name})
+    .populate({ path: "posts", populate: { path: "comments" } })
+      .exec(function(err, tag)
+      {
+        if(err)
+        {
+          return res
+            .status(400)
+            .json({
+              status: false,
+              error: 'Error getting the tag'
+            })
+        }
+        else if(!tag || tag.length===0)
+        {
+          return res
+            .status(400)
+            .json({
+              status: false,
+              error: 'No tag found'
+            })
+        }
+        res
+          .status(200)
+          .json({
+            status: true,
+            message: 'Success finding tag',
+            data: tag
+          })
+      })
   }
   else
   {
@@ -89,7 +122,7 @@ exports.getTags = (req, res) => {
             .status(400)
             .json({
               status: false,
-              message: 'Error getting the tags'
+              error: 'Error getting the tags'
             })
         }
         else if(!tags)
@@ -98,7 +131,7 @@ exports.getTags = (req, res) => {
             .status(400)
             .json({
               status: false,
-              message: 'No tags found'
+              error: 'No tags found'
             })
         }
         res
